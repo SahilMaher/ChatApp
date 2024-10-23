@@ -26,8 +26,13 @@ public class Server extends JFrame
     private Font font=new Font("Roboto",Font.PLAIN,20);
     public Server()
     {
+        int port = getPortFromUser();
+        if (port == -1) {
+            System.out.println("Invalid port number. Exiting...");
+            return; 
+        }
         try{
-            server =new ServerSocket(7777);  
+            server =new ServerSocket(port);  
             socket=server.accept();
             br=new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out=new PrintWriter(socket.getOutputStream());
@@ -44,6 +49,20 @@ public class Server extends JFrame
 
 
     }  
+    private int getPortFromUser() {
+        String portString = JOptionPane.showInputDialog(this, "Enter Port Number (1024-65535):");
+        try {
+            int port = Integer.parseInt(portString);
+            if (port >= 1024 && port <= 65535) {
+                return port;
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid port number. Please enter a number between 1024 and 65535.");
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Please enter a valid number.");
+        }
+        return -1; // Return -1 for invalid input
+    }
 public void startReading()
 {
     Runnable r1=()->

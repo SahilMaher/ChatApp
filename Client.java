@@ -1,4 +1,3 @@
-import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.BufferedReader;
@@ -23,8 +22,16 @@ public class Client extends JFrame
     
     public Client()
     {
+        String[] hostAndPort = getHostAndPortFromUser();
+        if (hostAndPort == null) {
+            System.out.println("Connection cancelled or invalid input. Exiting...");
+            return; // Exit if user input is invalid
+        }
+
+        String host = hostAndPort[0];
+        int port = Integer.parseInt(hostAndPort[1]);
         try {
-            socket=new Socket("localhost",7777);
+            socket=new Socket(host,port);
              br=new BufferedReader(new InputStreamReader(socket.getInputStream()));
             out=new PrintWriter(socket.getOutputStream());
             cteateGui();
@@ -36,6 +43,40 @@ public class Client extends JFrame
            
         }
 
+    }
+        private String[] getHostAndPortFromUser() {
+        JTextField hostField = new JTextField(10);
+        JTextField portField = new JTextField(10);
+        
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Host (localhost or IP):"));
+        panel.add(hostField);
+        panel.add(Box.createHorizontalStrut(15)); // spacer
+        panel.add(new JLabel("Port (1024-65535):"));
+        panel.add(portField);
+
+        int result = JOptionPane.showConfirmDialog(null, panel, 
+                 "Enter Host and Port", JOptionPane.OK_CANCEL_OPTION);
+        
+        if (result == JOptionPane.OK_OPTION) {
+            String host = hostField.getText();
+            String portStr = portField.getText();
+            if (!host.isEmpty() && isValidPort(portStr)) {
+                return new String[]{host, portStr};
+            } else {
+                JOptionPane.showMessageDialog(null, "Invalid input. Please enter valid host and port.");
+            }
+        }
+        return null; // Return null if the dialog was canceled or input was invalid
+    }
+
+    private boolean isValidPort(String portStr) {
+        try {
+            int port = Integer.parseInt(portStr);
+            return port >= 1024 && port <= 65535;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     public void cteateGui()
